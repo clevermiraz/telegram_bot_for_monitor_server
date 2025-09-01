@@ -12,12 +12,18 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
+ENVIRONMENT = os.getenv("ENVIRONMENT", "staging")  # default staging
+
+CPU_THRESHOLD = int(os.getenv("CPU_THRESHOLD", 80))
+MEM_THRESHOLD = int(os.getenv("MEM_THRESHOLD", 80))
+
 bot = Bot(token=TELEGRAM_TOKEN)
 
 
 async def send_alert(message):
     try:
-        await bot.send_message(chat_id=CHAT_ID, text=message)
+        prefix = "🚀 [Production]" if ENVIRONMENT == "production" else "🧪 [Staging]"
+        await bot.send_message(chat_id=CHAT_ID, text=f"{prefix} {message}")
         print("✅ Alert sent:", message)
     except Exception as e:
         print("❌ Failed to send alert:", e)
@@ -37,7 +43,7 @@ def check_docker_containers():
 def check_cpu_memory():
     cpu = psutil.cpu_percent()
     memory = psutil.virtual_memory().percent
-    if cpu > 80 or memory > 80:
+    if cpu > CPU_THRESHOLD or memory > MEM_THRESHOLD:
         return cpu, memory
     return None
 
