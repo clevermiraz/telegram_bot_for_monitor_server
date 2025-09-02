@@ -17,6 +17,9 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "staging")  # default staging
 CPU_THRESHOLD = int(os.getenv("CPU_THRESHOLD", 80))
 MEM_THRESHOLD = int(os.getenv("MEM_THRESHOLD", 80))
 
+BACKEND_URL = os.getenv("BACKEND_URL")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
+
 bot = Bot(token=TELEGRAM_TOKEN)
 
 
@@ -50,8 +53,7 @@ def check_cpu_memory():
 
 def check_backend_health():
     try:
-        response = requests.get(
-            "http://127.0.0.1:8000/api/accounts/public/health-check/")
+        response = requests.get(BACKEND_URL)
         if response.status_code != 200:
             return f"❌ Django Health Check Failed: {response.status_code}"
     except Exception as e:
@@ -61,7 +63,7 @@ def check_backend_health():
 
 def check_frontend_health():
     try:
-        response = requests.get("http://localhost:3000")
+        response = requests.get(FRONTEND_URL)
         if response.status_code != 200:
             return f"❌ Next.js Health Check Failed: {response.status_code}"
     except Exception as e:
